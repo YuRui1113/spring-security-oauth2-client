@@ -1,0 +1,26 @@
+corsOrigin: http://localhost:8081
+spring:
+  application:
+    name: spring-security-oauth2-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/book_database
+    username: postgres
+    password: 123456
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        # The SQL dialect makes Hibernate generate better SQL for the chosen database
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # Hibernate ddl auto (create, create-drop, validate, update)
+      ddl-auto: update
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          #jws-algorithms: RS512 # By default, NimbusJwtDecoder, and hence Resource Server, will only trust and verify tokens using RS256
+          issuer-uri: http://localhost:5001
+          #jwk-set-uri: http://localhost:5001/.well-known/openid-configuration/jwks # don't need, because it can be retrieved from issuer uri          
+server:
+  port: 8080

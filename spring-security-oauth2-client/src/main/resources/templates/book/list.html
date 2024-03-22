@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layout.html}">
+
+<head>
+    <title>Book Management System - Book List</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="row mb-2">
+            <div class="d-flex justify-content-between">
+                <div class="list-title">
+                    Book List
+                </div>
+                <div>
+                    <a class="btn btn-sm btn-primary rounded" id="btnAdd" onclick="showAddNewBookPage()">
+                        <span class="fas fa-plus-circle me-1"></span> Create New Book
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Index</th>
+                            <th class="text-center">Title</th>
+                            <th class="text-center">Author</th>
+                            <th class="text-center">Publication Year</th>
+                            <th class="text-center">ISBN</th>
+                            <th class="text-center"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="book, iterStat: ${books.content}">
+                            <td class="text-center" th:text="${(books.number * books.size)+ iterStat.count}"></td>
+                            <td class="text-center" th:text="${book.title}"></td>
+                            <td class="text-center" th:text="${book.author}"></td>
+                            <td class="text-center" th:text="${book.publicationYear}"></td>
+                            <td class="text-center" th:text="${book.isbn}"></td>
+                            <td class="text-center">
+                                <div class="btn-group text-justify">
+                                    <div class="text-justify ms-1 me-1">
+                                        <a data-toggle="tooltip" data-placement="top" title="Edit Book"
+                                            th:onclick="showUpdateBookPage([[${book}]])">
+                                            <span class="fas fa-edit text-primary"></span>
+                                        </a>
+                                    </div>
+                                    <div class="text-justify me-1">
+                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="Delete Book"
+                                            th:onclick="showDeleteBookConfirmation([[${book}]])">
+                                            <span class="fas fa-trash-alt text-primary"></span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${books.empty}">
+                            <td colspan="6" class="jumbotron text-center">
+                                No data
+                            </td>
+                        </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <ul class="pagination" th:if="${books.totalPages} > 1">
+                <li class="page-item" th:classappend="${books.number eq 0}? 'disabled'">
+                    <a class="page-link" th:href="@{/book/list(page=0)}">
+                        First
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${books.number le 0}? 'disabled'">
+                    <a class="page-link" th:href="@{/book/list(page=${books.number - 1})}">
+                        Previous
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${books.number ge (books.totalPages - 1)}? 'disabled'">
+                    <a class="page-link" th:href="@{/book/list(page=${books.number + 1})}">
+                        Next
+                    </a>
+                </li>
+                <li class="page-item" th:classappend="${books.number eq (books.totalPages - 1)}? 'disabled'">
+                    <a class="page-link" th:href="@{/book/list(page=${books.totalPages - 1})}">
+                        Last
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div id="divModelAddNewBook" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header modal-title-background">
+                        <h5 class="modal-title" id="bookDetailsTitle"> </h5>
+                        <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-left mx-1">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal"> Cancel </button>
+                        <button type="button" class="btn btn-primary" onclick="saveBook()"> Ok </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divDeleteConfirm" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Delete Confirmation</h4>
+                        <button type="button" class="btn-close" aria-hidden="true" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input id="txtDeleteId" type="hidden" />
+                        <p><span id="delConfirmPrompt"></span></p>
+                        <div class="bg-light">
+                            <p><small>Press Cancel to exit, and press OK to delete the book!</small></p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light me-3" data-bs-dismiss="modal"> Cancel </button>
+                        <button type="button" class="btn btn-primary" onclick="deleteBook()"> Ok </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div layout:fragment="script">
+        <script th:inline="javascript">
+            const modalAddNewBook = bootstrap.Modal.getOrCreateInstance("#divModelAddNewBook");
+
+            function showAddNewBookPage() {
+                $("#bookDetailsTitle").text("Add a new book");
+
+                $.get("/book/addNewBook", function (data) {
+                    $("#divModelAddNewBook").find(".modal-body").html(data);
+                })
+
+                modalAddNewBook.show();
+            }
+
+            function showUpdateBookPage(book) {
+                $("#bookDetailsTitle").text("Edit the book");
+
+                $.get("/book/editBook", book, function (data) {
+                    $("#divModelAddNewBook").find(".modal-body").html(data);
+                })
+
+                modalAddNewBook.show();
+            }
+
+            function showDeleteBookConfirmation(book) {
+                $("#delConfirmPrompt").text("Do you want to delete book with title '" + book.title + "'?");
+                $("#txtDeleteId").val(book.id);
+
+                const modalDeleteBookConfirm = bootstrap.Modal.getOrCreateInstance("#divDeleteConfirm");
+                modalDeleteBookConfirm.show();
+            }
+
+            function saveBook() {
+                var restApi = [[${ restApi }]];
+                var accessToken = [[${ accessToken }]];
+
+                var id = $("#txtId").val();
+                var title = $("#txtTitle").val();
+                var author = $("#txtAuthor").val();
+                var publicationYear = $("#txtPublicationYear").val();
+                var isbn = $("#txtISBN").val();
+
+                var jsonData = {
+                    "id": id,
+                    "title": title,
+                    "author": author,
+                    "publicationYear": publicationYear,
+                    "isbn": isbn
+                };
+
+                if (isNaN(id)) {
+                    addNewBook(restApi, accessToken, jsonData);
+                } else {
+                    updateBook(restApi, accessToken, id, jsonData);
+                }
+            }
+
+            function addNewBook(restApi, accessToken, jsonData) {
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: restApi + "/book",
+                        headers: {
+                            Authorization: 'Bearer ' + accessToken
+                        },
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(jsonData),
+                        success: function (data, textStatus, jqXHR) {
+                            alert("A new book was added successfully!");
+                            modalAddNewBook.hide();
+                            reloadBookList();
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            formatError(jqXHR, textStatus, errorThrown);
+
+                            alert("Failed to add a new book!");
+                        }
+                    }
+                );
+            }
+
+            function updateBook(restApi, accessToken, id, jsonData) {
+                $.ajax(
+                    {
+                        type: "PUT",
+                        url: restApi + "/book/" + id,
+                        headers: {
+                            Authorization: 'Bearer ' + accessToken
+                        },
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify(jsonData),
+                        success: function (data, textStatus, jqXHR) {
+                            alert("The book was updated successfully!");
+                            modalAddNewBook.hide();
+                            reloadBookList();
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            formatError(jqXHR, textStatus, errorThrown);
+
+                            alert("Failed to update the book!");
+                        }
+                    }
+                );
+            }
+
+            function deleteBook() {
+                var restApi = [[${ restApi }]];
+                var accessToken = [[${ accessToken }]];
+
+                var id = $("#txtDeleteId").val();
+                $.ajax(
+                    {
+                        type: "DELETE",
+                        url: restApi + "/book/" + id,
+                        headers: {
+                            Authorization: 'Bearer ' + accessToken
+                        },
+                        success: function (data, textStatus, jqXHR) {
+                            alert("The book was deleted successfully!");
+                            reloadBookList();
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            formatError(jqXHR, textStatus, errorThrown);
+
+                            alert("Failed to delete the book!");
+                        }
+                    }
+                );
+            }
+
+            function reloadBookList() {
+                window.location.href = "/book/list";
+            }
+
+            function formatError(jqXHR, textStatus, errorThrown) {
+                var message = "error: ";
+                if (textStatus == 'parsererror') {
+                    message += "Parsing request was failed – " + errorThrown;
+                } else if (errorThrown == 'timeout') {
+                    message += "Request time out.";
+                } else if (errorThrown == 'abort') {
+                    message += "Request was aborted.";
+                } else if (jqXHR.status === 0) {
+                    message += "No connection.";
+                } else if (jqXHR.status) {
+                    message += "HTTP Error " + jqXHR.status + " – " + jqXHR.statusText + ".";
+                } else {
+                    message += "Unknown error.";
+                }
+
+                console.log(message);
+            }
+        </script>
+    </div>
+</body>
+
+</html>

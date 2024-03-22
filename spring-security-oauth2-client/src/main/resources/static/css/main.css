@@ -1,0 +1,20 @@
+.error-input-50 {
+    border: 1px dotted red;
+    width: 50%;
+}
+
+.error-input-25 {
+    border: 1px dotted red;
+    width: 25%;
+}
+
+.error-radio {
+    border-radius: 50%;
+    border: 1px dotted red;
+    width: 1em;
+    height: 1em;
+}
+
+sup {
+    color: red;
+}

@@ -1,0 +1,58 @@
+<form th:object="${book}">
+    <div class="row mb-1">
+        <ul>
+            <li class="text-danger" th:each="err : ${#fields.errors('*')}" th:text="${err}" />
+        </ul>
+    </div>
+
+    <div class="row mb-2">
+        <div>
+            <input id="txtId" type="hidden" th:field="*{id}" />
+        </div>
+        <div class="form-group col-12">
+            <label class="form-label">Title<sup>*</sup></label>
+            <div class="input-group">
+                <span class="input-group-text"><span class="fas fa-tasks"></span></span>
+                <input id="txtTitle" type="text" class="form-control" th:field="*{title}" formControlName="title"
+                    placeholder="Book Title"
+                    th:classappend="${#fields.hasErrors('title')}? error-input-50: form-control" />
+            </div>
+        </div>
+        <div>
+            <span class="text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="form-group col-8">
+            <label class="form-label">Author<sup>*</sup></label>
+            <div class="input-group">
+                <span class="input-group-text"><span class="fas fa-user"></span></span>
+                <input id="txtAuthor" type="text" class="form-control" th:field="*{author}" formControlName="author"
+                    placeholder="Book Author" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="form-group col-8">
+            <label class="form-label">Publication Year<sup>*</sup></label>
+            <div class="input-group">
+                <span class="input-group-text"><span class="fas fa-clock"></span></span>
+                <input id="txtPublicationYear" type="text" class="form-control" th:field="*{publicationYear}"
+                    formControlName="publicationYear" placeholder="Book Publication Year" />
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <div class="form-group col-8">
+            <label class="form-label">ISBN<sup>*</sup></label>
+            <div class="input-group">
+                <span class="input-group-text"><span class="fas fa-book"></span></span>
+                <input id="txtISBN" type="text" class="form-control" th:field="*{isbn}" formControlName="isbn"
+                    placeholder="Book ISBN" />
+            </div>
+        </div>
+    </div>
+</form>
